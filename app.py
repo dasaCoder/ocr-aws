@@ -26,10 +26,20 @@ import pytesseract
 import json
 import requests
 from flask_cors import CORS, cross_origin
+import cv2
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+def convert_grayscale(img):
+ img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+ return img
+
+# remove noise
+def blur(img, param):
+ img = cv2.medianBlur(img, param)
+ return img
 
 @app.route('/')
 def hello_world():
@@ -39,8 +49,7 @@ def hello_world():
 def index():
  if request.files.get("image") is None:
     return {'error': 'Image is missing'}
-#  url='https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.2/manual/images/TMP_RichTextLineIndent.png'
-#  image = Image.open(requests.get(url, stream=True).raw)
  image = Image.open(request.files["image"])
- context = {'content' : pytesseract.image_to_string(image)}
+ tess_config = r'--oem 3 --psm 6 '
+ context = {'content' : pytesseract.image_to_string(image, config=tess_config)}
  return context
