@@ -54,8 +54,6 @@ def ocrMapping():
     image_file = request.files["image"]
     
     # Perform input validation - Check if it's a valid image file
-    if not is_valid_image(image_file):
-        return jsonify({"error": "Invalid image file"}), 400
 
     # Preprocess the image
     image = Image.open(image_file)
