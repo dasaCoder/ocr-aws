@@ -60,15 +60,16 @@ def ocrMapping():
     image = Image.open(image_file)
     image = image.resize((800, 600))  # Resize to a lower resolution
     image = image.convert('L')  # Convert to grayscale
-    image = cv2.cvtColor(np.array(image), cv2.COLOR_GRAY2BGR)  # Convert back to RGB (for compatibility with pytesseract)
+    # image = cv2.cvtColor(np.array(image), cv2.COLOR_GRAY2BGR)  # Convert back to RGB (for compatibility with pytesseract)
 
+    image_np = np.array(image)
     # Apply denoising
-    image = cv2.GaussianBlur(image, (5, 5), 0)
+    image_np = cv2.GaussianBlur(image_np, (5, 5), 0)
 
     # Thresholding
-    _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, image_np = cv2.threshold(image_np, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     # Perform OCR
-    context = {"content": pytesseract.image_to_string(image)}
+    context = {"content": pytesseract.image_to_string(image_np)}
 
     return jsonify(context), 200
