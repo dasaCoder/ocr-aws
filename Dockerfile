@@ -1,6 +1,10 @@
 # 1 
 FROM python:3.9
 
+# Install required system packages
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx
+
 # 3
 WORKDIR /app
 
