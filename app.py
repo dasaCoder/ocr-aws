@@ -20,12 +20,13 @@
 
 # app.py
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from PIL import Image
 import pytesseract
 import json
 import requests
 from flask_cors import CORS, cross_origin
+import cv2
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -44,3 +45,31 @@ def index():
  image = Image.open(request.files["image"])
  context = {'content' : pytesseract.image_to_string(image)}
  return context
+
+@app.route('/ocr/optimized', methods=["POST"])
+def ocrMapping():
+    if "image" not in request.files:
+        return jsonify({"error": "Image is missing"}), 400
+
+    image_file = request.files["image"]
+    
+    # Perform input validation - Check if it's a valid image file
+    if not is_valid_image(image_file):
+        return jsonify({"error": "Invalid image file"}), 400
+
+    # Preprocess the image
+    image = Image.open(image_file)
+    image = image.resize((800, 600))  # Resize to a lower resolution
+    image = image.convert('L')  # Convert to grayscale
+    image = cv2.cvtColor(np.array(image), cv2.COLOR_GRAY2BGR)  # Convert back to RGB (for compatibility with pytesseract)
+
+    # Apply denoising
+    image = cv2.GaussianBlur(image, (5, 5), 0)
+
+    # Thresholding
+    _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Perform OCR
+    context = {"content": pytesseract.image_to_string(image)}
+
+    return jsonify(context), 200
