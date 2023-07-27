@@ -70,6 +70,6 @@ def ocrMapping():
     _, image_np = cv2.threshold(image_np, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     # Perform OCR
-    context = {"content": pytesseract.image_to_string(image_np)}
+    context = {"content": pytesseract.image_to_string(image_np, config='--oem 1 --psm 6')}
 
     return jsonify(context), 200
